@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PowerItem : MonoBehaviour
 {
-    private Animator animator;
+    Animator animator;
 
     private void Awake()
     {

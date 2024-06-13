@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class MouseDrawArrow : MonoBehaviour
 {
-    private Image image;
+    Image image;
     public bool isDraw;
     public Vector3 mouseStartPos;
     public Vector3 mouseEndPos;
@@ -38,8 +38,11 @@ public class MouseDrawArrow : MonoBehaviour
         if (isDraw)
         {
             Vector3 mouseDir = mouseStartPos - mouseEndPos;
-            float size = mouseDir.magnitude;
-            image.rectTransform.sizeDelta = new Vector2(size, size);
+            float sizeY = mouseDir.magnitude;
+            float sizeX = sizeY / 5;
+            if (sizeX < 100)
+                sizeX = 100;
+            image.rectTransform.sizeDelta = new Vector2(sizeX, sizeY);
             transform.position = mouseStartPos;
             Vector3 dir = mouseDir.normalized;
             transform.rotation = Quaternion.FromToRotation(Vector3.up, dir);

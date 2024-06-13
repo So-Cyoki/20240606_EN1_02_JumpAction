@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class MouseMove : MonoBehaviour
 {
-    private Rigidbody rig;
-    private Vector3 mouseStartPos;
-    private Vector3 mouseEndPos;
-    private Vector3 mouseDir;
-    public bool isAddForce;
+    Rigidbody rig;
+    Vector3 mouseStartPos;
+    Vector3 mouseEndPos;
+    Vector3 mouseDir;
+    bool isAddForce;
     public float forceValue;
     private void Awake()
     {
@@ -34,8 +34,8 @@ public class MouseMove : MonoBehaviour
         //AddForce
         if (isAddForce)
         {
-            float mouseLength = (mouseStartPos - mouseEndPos).magnitude * 0.01f;
-            rig.AddForce(forceValue * mouseLength * mouseDir, ForceMode.Impulse);
+            float mouseLength = (mouseStartPos - mouseEndPos).magnitude;
+            rig.AddForce(forceValue * mouseLength * Time.deltaTime * mouseDir, ForceMode.Impulse);
             isAddForce = false;
         }
     }
