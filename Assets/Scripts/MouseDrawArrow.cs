@@ -9,10 +9,9 @@ public class MouseDrawArrow : MonoBehaviour
     public bool isDraw;
     public Vector3 mouseStartPos;
     public Vector3 mouseEndPos;
-    private Vector3 mouseDir;
     private void Awake()
     {
-        image = GetComponent<UnityEngine.UI.Image>();
+        image = GetComponent<Image>();
     }
 
     private void Update()
@@ -35,10 +34,10 @@ public class MouseDrawArrow : MonoBehaviour
             mouseStartPos = Vector3.zero;
             mouseEndPos = Vector3.zero;
         }
-        mouseDir = mouseStartPos - mouseEndPos;
         //ArrowDraw
         if (isDraw)
         {
+            Vector3 mouseDir = mouseStartPos - mouseEndPos;
             float size = mouseDir.magnitude;
             image.rectTransform.sizeDelta = new Vector2(size, size);
             transform.position = mouseStartPos;
