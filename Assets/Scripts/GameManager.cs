@@ -4,15 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    //TODO:MouseMove里面的根据长度修改消耗的能量功能还没完成
+    //现在有一个想法，就是从背面飞来方块，玩家要躲开防止被撞下去
 }

@@ -11,7 +11,7 @@ public class MouseMove : MonoBehaviour
     bool isAddForce;
     public float forceValue;
     public float powerValueMax;
-    //[HideInInspector]
+    [HideInInspector]
     public float powerValue;
     public float consumPowerValue;
     public float addPowerValue;
