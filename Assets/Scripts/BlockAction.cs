@@ -8,13 +8,20 @@ public class BlockAction : MonoBehaviour
 {
     public float speed;
     public bool isStaty;//是否到位了
+    Rigidbody rig;
+
+    private void Start()
+    {
+        rig = GetComponent<Rigidbody>();
+    }
 
     private void Update()
     {
         //Move
         if (transform.position.z > 0)
         {
-            transform.position -= new Vector3(0, 0, speed);
+            //transform.position -= new Vector3(0, 0, speed);
+            rig.AddForce(Vector3.back * speed);
         }
         else
         {
