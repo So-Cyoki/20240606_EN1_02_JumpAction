@@ -101,7 +101,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -148,3 +148,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 0.5
   isStaty: 0
+  startColor: {r: 0.19999999, g: 0.19999999, b: 0.19999999, a: 0}
+  endColor: {r: 1, g: 0, b: 0, a: 0}
+  color_targetPosZ: 0

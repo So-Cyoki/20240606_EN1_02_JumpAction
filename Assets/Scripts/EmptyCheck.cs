@@ -6,14 +6,11 @@ public class EmptyCheck : MonoBehaviour
 {
     public bool isBlockOn;
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (other.transform.CompareTag("Block"))
             isBlockOn = true;
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.transform.CompareTag("Block"))
+        else
             isBlockOn = false;
     }
 }
