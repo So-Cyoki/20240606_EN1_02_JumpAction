@@ -18,11 +18,21 @@ public class MouseMove : MonoBehaviour
     public float addTime;//每次回复能量的时间
     float currentTime;
     public float timeScaleValue;
+    float originalFixDeltaTime;//保存原本的物理计算时间
+    float originalTimeScale;//保存原本的帧数时间
+
+    bool isDead;
 
     private void Awake()
     {
         rig = GetComponent<Rigidbody>();
         powerValue = powerValueMax;
+    }
+
+    private void Start()
+    {
+        originalFixDeltaTime = Time.fixedDeltaTime;
+        originalTimeScale = Time.timeScale;
     }
 
     private void Update()
@@ -45,13 +55,15 @@ public class MouseMove : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             mouseEndPos = Input.mousePosition;
-            Time.timeScale = timeScaleValue;
+            Time.timeScale = originalTimeScale * timeScaleValue;
+            Time.fixedDeltaTime = originalFixDeltaTime * timeScaleValue;
         }
         if (Input.GetMouseButtonUp(0))
         {
             isAddForce = true;
             rig.velocity = Vector3.zero;//发射的时候把速度清零，会更有操作感(为了对抗下落的速度)
-            Time.timeScale = 1;
+            Time.timeScale = originalTimeScale;
+            Time.fixedDeltaTime = originalFixDeltaTime;
         }
         mouseDir = (mouseStartPos - mouseEndPos).normalized;
         //AddForce
@@ -75,7 +87,22 @@ public class MouseMove : MonoBehaviour
             rig.AddForce(force * mouseDir, ForceMode.Impulse);
             isAddForce = false;
         }
+
+        //isDead
+        if (isDead)
+        {
+            rig.constraints &= ~RigidbodyConstraints.FreezePositionZ;//解锁Z轴
+            rig.velocity = Vector3.zero;
+            rig.AddForce(Vector3.back * 10, ForceMode.Impulse);
+            isDead = false;
+        }
     }
 
-
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.transform.CompareTag("Block"))
+        {
+            isDead = true;
+        }
+    }
 }

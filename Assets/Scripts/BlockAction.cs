@@ -25,41 +25,23 @@ public class BlockAction : MonoBehaviour
 
     private void Update()
     {
-        //Move
-        if (transform.position.z > 0)
-        {
-            //transform.position -= new Vector3(0, 0, speed);
-            rig.AddForce(Vector3.back * speed);
-        }
-        else
-        {
-            transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-            isStaty = true;
-        }
+        //Move(这是旧版的，z到达0的时候就会停下)
+        // if (transform.position.z > 0)
+        // {
+        //     //transform.position -= new Vector3(0, 0, speed);
+        //     rig.AddForce(Vector3.back * speed);
+        // }
+        // else
+        // {
+        //     transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        //     isStaty = true;
+        // }
+        rig.AddForce(Vector3.back * speed);//Move
         Color colorLerp = Color.Lerp(startColor, endColor,
         Mathf.Abs((color_moveLength - transform.position.z) / color_moveLength));
         ballRenderer.material.color = colorLerp;
-    }
-
-    private void OnCollisionEnter(Collision other)
-    {
-        if (isStaty)
-        {
-            if (other.transform.CompareTag("Block"))
-                Destroy(other.gameObject);
-            else if (other.transform.CompareTag("Player"))
-                Destroy(this.gameObject);
-        }
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-
-        if (isStaty)
-        {
-            if (other.transform.CompareTag("Block"))
-                Destroy(other.gameObject);
-            else if (other.transform.CompareTag("Player"))
-                Destroy(this.gameObject);
-        }
+        //超出一定范围就消除
+        if (transform.position.z < -20)
+            Destroy(transform.gameObject);
     }
 }
