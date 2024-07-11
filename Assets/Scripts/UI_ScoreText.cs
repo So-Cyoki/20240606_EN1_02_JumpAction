@@ -27,4 +27,9 @@ public class UI_ScoreText : MonoBehaviour
     {
         score++;
     }
+
+    public void Restart()
+    {
+        score = 0;
+    }
 }

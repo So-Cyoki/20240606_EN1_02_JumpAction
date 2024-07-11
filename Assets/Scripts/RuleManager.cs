@@ -12,10 +12,12 @@ public class RuleManager : MonoBehaviour
     public int targetLine;//目标的行数
     public int targetRow;//目标的列数
     public float cubeSize;//方块的大小
-    [Tooltip("一次至多生成多少个方块")]
-    public int newNum;
     int prevTargetLine;//用于记录前一次生成的位置行数，至少一次不重复
+    public MouseMove mouseMove;
     public UI_ScoreText ui_ScoreText;//用于加分处理，所以把脚本保存在这里
+    public int oneShotNumber;//一次生成多少个
+    public float oneShotTime;//每次生成之间的间隔
+    float currentTime_oneShotTime;
     private void Awake()
     {
         startPoint = transform.Find("StartPoint");
@@ -32,6 +34,41 @@ public class RuleManager : MonoBehaviour
 
     private void Update()
     {
+        if (!mouseMove.isDead)
+            GameRule();
+    }
+
+    void GameRule()
+    {
+        int score = ui_ScoreText.score;
+        int oneShotNumberOffset = 0;
+        if (score <= 50)
+            oneShotNumberOffset = oneShotNumber * 1;
+        else if (score <= 150)
+            oneShotNumberOffset = oneShotNumber * 2;
+        else if (score <= 250)
+            oneShotNumberOffset = oneShotNumber * 3;
+        else if (score <= 450)
+            oneShotNumberOffset = oneShotNumber * 4;
+        else if (score <= 650)
+            oneShotNumberOffset = oneShotNumber * 5;
+        //关卡生成
+        bool isStart = false;
+        currentTime_oneShotTime -= Time.deltaTime;
+        if (currentTime_oneShotTime < 0)
+        {
+            isStart = true;
+            currentTime_oneShotTime = oneShotTime;
+        }
+        if (isStart)
+        {
+            for (int i = 0; i < oneShotNumberOffset; i++)
+                CubeRandomInstantiate();
+        }
+    }
+
+    void CubeRandomInstantiate()
+    {
         //随机生成出一行方块，作为障碍物
         Vector3 startPos = new();//方块生成的位置
         int randLine = Random.Range(0, targetLine);//随机一行
@@ -43,11 +80,11 @@ public class RuleManager : MonoBehaviour
         startPos.z = startPoint.position.z;
         //一行生成多少次方块
         int frequency = Random.Range(1, targetRow - randRow);
-        if (Input.GetKeyDown(KeyCode.Space))
-            for (int i = 0; i < frequency; i++)
-            {
-                Instantiate(block, new(startPos.x + i * 1, startPos.y, startPos.z), Quaternion.identity, this.transform);
-            }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        for (int i = 0; i < frequency; i++)
+        {
+            Instantiate(block, new(startPos.x + i * 1, startPos.y, startPos.z), Quaternion.identity, this.transform);
+        }
         prevTargetLine = randLine;
     }
 
@@ -65,5 +102,17 @@ public class RuleManager : MonoBehaviour
             return pos;
         pos = emptys[Random.Range(0, emptys.Count)];
         return pos;
+    }
+
+    public void Restart()
+    {
+        List<Transform> deleteObjList = new();
+        foreach (Transform child in transform)
+        {
+            if (child.CompareTag("Block"))
+                deleteObjList.Add(child);
+        }
+        foreach (Transform item in deleteObjList)
+            Destroy(item.gameObject);
     }
 }

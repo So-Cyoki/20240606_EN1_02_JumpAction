@@ -26,12 +26,15 @@ public class MouseMove : MonoBehaviour
     public float timeScaleValue;
     float originalFixDeltaTime;//保存原本的物理计算时间
     float originalTimeScale;//保存原本的帧数时间
+    Vector3 originalPos;
 
     bool isAddForce;
     bool isPowerAllOver;//能量消耗过尽
     bool isTimeSlow;//时间缓慢
-    bool isDead;//这个状态还没完全写完！
+    [HideInInspector]
+    public bool isDead;
     bool isDeadEffect;
+    bool isRestart;
     public float deadAddForce;
     public Color color;
     public Color noPowerColor;
@@ -51,6 +54,7 @@ public class MouseMove : MonoBehaviour
     {
         originalFixDeltaTime = Time.fixedDeltaTime;
         originalTimeScale = Time.timeScale;
+        originalPos = transform.position;
         //获得能量条UI的宽度，然后根据设定的能量恢复状态的数值，来设置低能量提醒UI的宽度
         float powerBarW = ui_powerValueBar.rect.width;
         RectTransform powerMessageBar = ui_powerValueBar.Find("PowerMessage").GetComponent<RectTransform>();
@@ -103,7 +107,7 @@ public class MouseMove : MonoBehaviour
             }
         }
         //MousePosition
-        if (!isPowerAllOver)
+        if (!isPowerAllOver && !isDead)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -129,7 +133,7 @@ public class MouseMove : MonoBehaviour
         }
         //AddForce
         mouseDir = (mouseStartPos - mouseEndPos).normalized;
-        if (isAddForce && powerValue > 0)
+        if (isAddForce && powerValue > 0 && !isDead)
         {
             float mouseLength = (mouseStartPos - mouseEndPos).magnitude;
             float force = forceValue * mouseLength * Time.deltaTime;
@@ -151,9 +155,29 @@ public class MouseMove : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (isRestart)
+        {
+            rig.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            powerValue = powerValueMax;
+            rig.velocity = Vector3.zero;
+            rig.angularVelocity = Vector3.zero;
+            rig.Sleep();
+            isRestart = false;
+        }
+    }
+
+    public void Restart()
+    {
+        isDead = false;
+        transform.position = originalPos;
+        isRestart = true;
+    }
+
     private void OnCollisionEnter(Collision other)
     {
-        if (other.transform.CompareTag("Block") && !isDead)
+        if (other.transform.CompareTag("BlockForward") && !isDead)
         {
             isDead = true;
             isDeadEffect = true;
