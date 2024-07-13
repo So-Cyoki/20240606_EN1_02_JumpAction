@@ -21,6 +21,9 @@ public class PowerItem : MonoBehaviour
         if (other.transform.CompareTag("Player"))
         {
             animator.SetTrigger("tGet");
+            transform.parent.GetComponent<ItemAction_power>().isGet = true;
+            MouseMove mouseMove = other.GetComponent<MouseMove>();
+            mouseMove.GetItme();
         }
     }
 }

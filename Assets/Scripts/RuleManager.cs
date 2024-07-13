@@ -6,6 +6,7 @@ public class RuleManager : MonoBehaviour
 {
     Transform startPoint;
     public GameObject block;
+    public GameObject item_power;
     Transform emptyBlock;
     List<EmptyCheck> emptyChecks = new();
     public Vector3 targetLeftUpPos;//目标的左上角开始坐标
@@ -13,6 +14,8 @@ public class RuleManager : MonoBehaviour
     public int targetRow;//目标的列数
     public float cubeSize;//方块的大小
     int prevTargetLine;//用于记录前一次生成的位置行数，至少一次不重复
+    int itemBornChances;//生成Item的几率
+    public int itemBornChancesAdd;//不生成的话，每回加多少概率
     public MouseMove mouseMove;
     public UI_ScoreText ui_ScoreText;//用于加分处理，所以把脚本保存在这里
     public int oneShotNumber;//一次生成多少个
@@ -78,12 +81,31 @@ public class RuleManager : MonoBehaviour
         startPos.y = targetLeftUpPos.y - randLine * cubeSize;
         startPos.x = targetLeftUpPos.x + randRow * cubeSize;
         startPos.z = startPoint.position.z;
-        //一行生成多少次方块
-        int frequency = Random.Range(1, targetRow - randRow);
-        //if (Input.GetKeyDown(KeyCode.Space))
-        for (int i = 0; i < frequency; i++)
+        //不生成方块，生成Item的随机计算
+        bool isItemBorn = false;
+        int itemBorn = Random.Range(0, 100);
+        if (itemBorn <= itemBornChances)
         {
-            Instantiate(block, new(startPos.x + i * 1, startPos.y, startPos.z), Quaternion.identity, this.transform);
+            isItemBorn = true;
+            itemBornChances = 0;
+        }
+        else
+            itemBornChances += itemBornChancesAdd;
+
+        //生成方块还是Item
+        if (!isItemBorn)
+        {
+            //一行生成多少次方块
+            int frequency = Random.Range(1, targetRow - randRow);
+            //if (Input.GetKeyDown(KeyCode.Space))
+            for (int i = 0; i < frequency; i++)
+            {
+                Instantiate(block, new(startPos.x + i * 1, startPos.y, startPos.z), Quaternion.identity, this.transform);
+            }
+        }
+        else
+        {
+            Instantiate(item_power, new(startPos.x, startPos.y, startPos.z), Quaternion.identity, this.transform);
         }
         prevTargetLine = randLine;
     }
@@ -109,7 +131,7 @@ public class RuleManager : MonoBehaviour
         List<Transform> deleteObjList = new();
         foreach (Transform child in transform)
         {
-            if (child.CompareTag("Block"))
+            if (child.CompareTag("Block") || child.CompareTag("Item"))
                 deleteObjList.Add(child);
         }
         foreach (Transform item in deleteObjList)

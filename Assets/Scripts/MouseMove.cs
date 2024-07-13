@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class MouseMove : MonoBehaviour
 {
@@ -28,7 +29,7 @@ public class MouseMove : MonoBehaviour
     float originalTimeScale;//保存原本的帧数时间
     Vector3 originalPos;
 
-    bool isAddForce;
+    bool isAddForce = false;
     bool isPowerAllOver;//能量消耗过尽
     bool isTimeSlow;//时间缓慢
     [HideInInspector]
@@ -39,15 +40,21 @@ public class MouseMove : MonoBehaviour
     public Color color;
     public Color noPowerColor;
     public Transform cameraTrans;
+    AudioSource cameraAudio;
     public RectTransform ui_powerValueBar;
     public Image ui_timeSlowImage;
     public float timeSlowImageAlpha;
+
+    public event Action<AudioPlayer.AudioName> OnPlayAudio;
 
     private void Awake()
     {
         rig = GetComponent<Rigidbody>();
         mesh = GetComponent<MeshRenderer>();
         powerValue = powerValueMax;
+        AudioPlayer audioPlayer = GetComponent<AudioPlayer>();
+        OnPlayAudio += audioPlayer.PlayAudio;
+        cameraAudio = cameraTrans.GetComponent<AudioSource>();
     }
 
     private void Start()
@@ -67,6 +74,7 @@ public class MouseMove : MonoBehaviour
         if (powerValue <= 0)
         {
             isPowerAllOver = true;
+            OnPlayAudio?.Invoke(AudioPlayer.AudioName.noPower);
             ui_timeSlowImage.DOFade(0, 0.5f);
         }
         else if (powerValue >= powerRestartValue)
@@ -75,6 +83,7 @@ public class MouseMove : MonoBehaviour
         {
             Time.timeScale = originalTimeScale;
             Time.fixedDeltaTime = originalFixDeltaTime;
+            cameraAudio.pitch = 1;
             isAddForce = false;
             isTimeSlow = false;
             mesh.material.color = noPowerColor;
@@ -119,27 +128,20 @@ public class MouseMove : MonoBehaviour
                 mouseEndPos = Input.mousePosition;
                 Time.timeScale = originalTimeScale * timeScaleValue;
                 Time.fixedDeltaTime = originalFixDeltaTime * timeScaleValue;
+                cameraAudio.pitch = 0.8f;
                 isTimeSlow = true;
             }
             if (Input.GetMouseButtonUp(0))
             {
-                rig.velocity = Vector3.zero;//发射的时候把速度清零，会更有操作感(为了对抗下落的速度)
                 Time.timeScale = originalTimeScale;
                 Time.fixedDeltaTime = originalFixDeltaTime;
+                cameraAudio.pitch = 1;
                 isAddForce = true;
                 isTimeSlow = false;
                 ui_timeSlowImage.DOFade(0, 0.5f);
             }
         }
-        //AddForce
         mouseDir = (mouseStartPos - mouseEndPos).normalized;
-        if (isAddForce && powerValue > 0 && !isDead)
-        {
-            float mouseLength = (mouseStartPos - mouseEndPos).magnitude;
-            float force = forceValue * mouseLength * Time.deltaTime;
-            rig.AddForce(force * mouseDir, ForceMode.Impulse);
-            isAddForce = false;
-        }
 
         //isDead
         if (isDead)
@@ -151,12 +153,25 @@ public class MouseMove : MonoBehaviour
             rig.velocity = Vector3.zero;
             Vector3 dir = new Vector3(cameraTrans.position.x, cameraTrans.position.y + 1, cameraTrans.position.z) - transform.position;
             rig.AddForce(dir * deadAddForce, ForceMode.Impulse);
+            OnPlayAudio?.Invoke(AudioPlayer.AudioName.dead);
             isDeadEffect = false;
         }
     }
 
     private void FixedUpdate()
     {
+        //AddForce
+        if (isAddForce && powerValue > 0 && !isDead)
+        {
+            rig.velocity = Vector3.zero;//发射的时候把速度清零，会更有操作感(为了对抗下落的速度)
+            rig.angularVelocity = Vector3.zero;
+            //rig.Sleep();
+            float mouseLength = (mouseStartPos - mouseEndPos).magnitude;
+            float force = forceValue * mouseLength * Time.deltaTime;
+            rig.AddForce(force * mouseDir, ForceMode.Impulse);
+            OnPlayAudio?.Invoke(AudioPlayer.AudioName.shout);
+            isAddForce = false;
+        }
         if (isRestart)
         {
             rig.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
@@ -175,6 +190,12 @@ public class MouseMove : MonoBehaviour
         isRestart = true;
     }
 
+    public void GetItme()
+    {
+        powerValue = powerValueMax;
+        OnPlayAudio?.Invoke(AudioPlayer.AudioName.getItem);
+    }
+
     private void OnCollisionEnter(Collision other)
     {
         if (other.transform.CompareTag("BlockForward") && !isDead)
@@ -182,5 +203,7 @@ public class MouseMove : MonoBehaviour
             isDead = true;
             isDeadEffect = true;
         }
+        else
+            OnPlayAudio?.Invoke(AudioPlayer.AudioName.wallTouch);
     }
 }

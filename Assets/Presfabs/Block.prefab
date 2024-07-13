@@ -282,6 +282,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 0.5
   isStaty: 0
-  startColor: {r: 0.19999999, g: 0.19999999, b: 0.19999999, a: 0}
+  startColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0}
   endColor: {r: 1, g: 0, b: 0, a: 1}
   color_targetPosZ: 0

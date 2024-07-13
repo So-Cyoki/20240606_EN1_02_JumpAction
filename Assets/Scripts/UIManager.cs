@@ -7,7 +7,12 @@ public class UIManager : MonoBehaviour
     public MouseMove player;
     public GameObject ui_gameStart;
     public GameObject ui_gameOver;
+    AudioSource audioSource;
 
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
     private void Start()
     {
         ui_gameStart.SetActive(true);
@@ -20,5 +25,10 @@ public class UIManager : MonoBehaviour
         {
             ui_gameOver.SetActive(true);
         }
+    }
+
+    public void PlayAudio()
+    {
+        audioSource.Play();
     }
 }
